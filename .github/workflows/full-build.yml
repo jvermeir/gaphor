@@ -155,7 +155,7 @@ jobs:
   macos:
     name: macOS
     needs: lint
-    runs-on: macos-12
+    runs-on: macos-14
     permissions:
       contents: write
     timeout-minutes: 45
@@ -193,7 +193,7 @@ jobs:
       - name: Run Gaphor Tests
         run: poetry run pytest --cov
       - name: Create macOS Application
-        id: create
+        id: create_x86
         uses: ./.github/actions/macos_dmg
         with:
           sign_app: ${{ env.mainline_build }}
@@ -203,6 +203,19 @@ jobs:
           notary_username:  ${{ secrets.APPLE_NOTARY_USER }}
           notary_password: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           notary_team_id: ${{ secrets.APPLE_TEAM_ID }}
+          cpu_architecture: 'x86'
+      - name: Create macOS Application
+        id: create_arm
+        uses: ./.github/actions/macos_dmg
+        with:
+          sign_app: ${{ env.mainline_build }}
+          version: ${{ steps.install.outputs.version }}
+          base64_encoded_p12: ${{ secrets.BASE64_ENCODED_P12 }}
+          certpassword_p12: ${{ secrets.CERTPASSWORD_P12 }}
+          notary_username:  ${{ secrets.APPLE_NOTARY_USER }}
+          notary_password: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          notary_team_id: ${{ secrets.APPLE_TEAM_ID }}
+          cpu_architecture: 'arm'
 
   check-macos-app:
     name: Check macOS App
